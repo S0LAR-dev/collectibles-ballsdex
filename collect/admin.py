@@ -1,5 +1,15 @@
 from django.contrib import admin
-from .models import Collectible, PlayerCollectible
+from .models import Collectible, PlayerCollectible, GroupName
+
+@admin.register(GroupName)
+class GroupNameAdmin(admin.ModelAdmin):
+    list_display = ("group_name", "plural")
+
+    def has_add_permission(self, request):
+        return not GroupName.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Collectible)
 class CollectibleAdmin(admin.ModelAdmin):
