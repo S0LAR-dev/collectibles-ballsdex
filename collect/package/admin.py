@@ -45,7 +45,7 @@ class CollectibleConverter(commands.Converter):
             raise commands.BadArgument(f'{GROUP_NAME_CAP[:-1]} "{value}" not found.')
         return result
 
-@commands.hybrid_group(name=GROUP_NAME.lower()
+@commands.hybrid_group(name=GROUP_NAME.lower())
 @checks.is_staff()
 async def collectibles(ctx: commands.Context["BallsDexBot"]):
     await ctx.send_help(ctx.command)
