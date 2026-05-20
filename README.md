@@ -13,9 +13,6 @@ Extra collectibles for your dex! Utilizes currency for purchasing collectibles a
    enabled = true
    editable = false
 
-   [collectibles]
-   command_group_name = "collectibles"
-
    ```
 2. Rebuild your bot
    ```
@@ -33,4 +30,4 @@ Extra collectibles for your dex! Utilizes currency for purchasing collectibles a
 - Again, this isnt a copy of the collector card package. The link for it is embedded at the top of this markdown
 - There is a preloaded test charm that comes when you install this package. If no charms are in the database the shop command doesnt work.
 - Make sure there is a way for players to obtain currency, otherwise this package is useless! If you want to find packages that work with currency you can join the [BallsDex Developers Server](https://discord.gg/TJQ2evaDBW) to find custom packages, or wait for me to release more!
-- If you wish to edit the name of "Collectibles" into something else prepare for a gruesome proccess
+- If you wish to edit the name of "Collectibles" into something else edit the preloaded GroupName model to make it something else
