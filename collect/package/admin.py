@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import discord
 from discord import app_commands
 from discord.ext import commands
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 import tomllib
 
 from ballsdex.core.utils import checks
@@ -18,19 +18,11 @@ if TYPE_CHECKING:
 
 log = logging.getLogger("ballsdex.packages.admin.collectibles")
 
+GROUP_MODEL = async_to_sync(GroupName.objects.aget)(pk=1)
 
-def load_group_name() -> str:
-    try:
-        with open("config/extra.toml", "rb") as f:
-            data = tomllib.load(f)
-            return data.get("collectibles", {}).get("group_name", "collectibles")
-    except Exception:
-        return "collectibles"
-
-
-GROUP_NAME = load_group_name()
+GROUP_NAME = GROUP_MODEL.group_name
 GROUP_NAME_CAP = GROUP_NAME.capitalize()
-
+plural = GROUP_MODEL.plural
 
 class CollectibleConverter(commands.Converter):
     async def convert(self, ctx: commands.Context, value: str) -> Collectible:
