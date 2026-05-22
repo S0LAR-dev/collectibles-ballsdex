@@ -11,7 +11,7 @@ import tomllib
 
 from ballsdex.core.utils import checks
 from bd_models.models import Player
-from collect.models import Collectible, PlayerCollectible
+from collect.models import Collectible, PlayerCollectible, GroupName
 
 if TYPE_CHECKING:
     from ballsdex.core.bot import BallsDexBot
