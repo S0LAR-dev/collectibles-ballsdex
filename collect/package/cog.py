@@ -9,7 +9,7 @@ from asgiref.sync import sync_to_async, async_to_sync
 import tomllib
 
 from bd_models.models import Player, Ball, BallInstance
-from collect.models import Collectible, PlayerCollectible
+from collect.models import Collectible, PlayerCollectible, GroupName
 from ballsdex.core.utils.utils import inventory_privacy, is_staff
 
 if TYPE_CHECKING:
