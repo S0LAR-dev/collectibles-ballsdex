@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "collect"
-version = "1.2.2"
+version = "1.2.3"
 description = "Collectible items for your BallsDex clone! Must have currency"
 license = "MIT"
 authors = [
