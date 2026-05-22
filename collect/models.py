@@ -21,6 +21,7 @@ class GroupName(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
+        db_table = "groupname"
         verbose_name = "Group Name"
         verbose_name_plural = "Group Name"
 
