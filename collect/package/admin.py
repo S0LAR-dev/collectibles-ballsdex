@@ -44,7 +44,7 @@ class CollectibleConverter(commands.Converter):
         return result
 
 
-class Collectibles(commands.Cog):
+class CollectAdmin(commands.Cog):
     def __init__(self, bot: "BallsDexBot"):
         self.bot = bot
         self.group_model: GroupName | None = None
