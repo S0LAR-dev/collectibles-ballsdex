@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from .cog import Collectibles as CollectiblesCog
-from .admin import Collectibles as AdminCollectiblesCog
+from .admin import CollectAdmin as AdminCollectiblesCog
 
 if TYPE_CHECKING:
     from ballsdex.core.bot import BallsDexBot
