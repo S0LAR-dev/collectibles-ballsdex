@@ -61,15 +61,12 @@ class CollectAdmin(commands.Cog):
         GROUP_NAME_CAP = GROUP_NAME.capitalize()
         plural = self.group_model.plural
 
-        type(self).collectibles.name = plural.lower()
-        type(self).collectibles.description = f"{GROUP_NAME_CAP} management commands"
-
-    collectibles = app_commands.Group(
-        name="collectibles",
-        description="Collectible management commands",
+    collectibles_admin = app_commands.Group(
+        name="collectibles-admin",
+        description="Admin commands for collectibles",
     )
 
-    @collectibles.command(name="give")
+    @collectibles_admin.command(name="give")
     @checks.is_staff()
     async def collectibles_give(
         self,
@@ -116,7 +113,7 @@ class CollectAdmin(commands.Cog):
             extra={"webhook": True},
         )
 
-    @collectibles.command(name="remove")
+    @collectibles_admin.command(name="remove")
     @checks.is_staff()
     async def collectibles_remove(
         self,
@@ -155,7 +152,7 @@ class CollectAdmin(commands.Cog):
             extra={"webhook": True},
         )
 
-    @collectibles.command(name="create")
+    @collectibles_admin.command(name="create")
     @checks.is_staff()
     async def collectibles_create(
         self,
