@@ -169,7 +169,7 @@ class NextButton(discord.ui.Button):
 
 class BuyButton(discord.ui.Button):
     def __init__(self):
-        super().__init__(style=discord.ButtonStyle.success, label=f"{currency_symbol} Buy", custom_id="buy")
+        super().__init__(style=discord.ButtonStyle.success, label=f"{settings.currency_symbol} Buy", custom_id="buy")
 
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
@@ -363,6 +363,7 @@ class Collectibles(commands.Cog):
         view.message = message
 
     async def completion(self, interaction: discord.Interaction, user: discord.User | None = None):
+        
         user_obj = user or interaction.user
         await interaction.response.defer(thinking=True)
 
@@ -379,7 +380,7 @@ class Collectibles(commands.Cog):
             await interaction.followup.send(f"You cannot view the {plural} of a user who has blocked you.", ephemeral=True)
             return
 
-        if inventory_privacy(self.bot, interaction, player, user_obj) is False:
+        if await inventory_privacy(self.bot, interaction, player, user_obj) is False:
             return
 
         all_items = await sync_to_async(list)(Collectible.objects.all().order_by("id"))
@@ -416,15 +417,15 @@ class Collectibles(commands.Cog):
                     entries.append((f"__**{title}**__", buffer))
 
         if owned_ids:
-            fill_fields(f"Owned {GROUP_NAME_CAP}", owned_ids)
+            fill_fields(f"Owned {plural}", owned_ids)
         else:
-            entries.append((f"__**Owned {GROUP_NAME_CAP}**__", "Nothing yet."))
+            entries.append((f"__**Owned {plural}**__", "Nothing yet."))
 
         missing_ids = set(all_items_by_id.keys()) - owned_ids
         if missing_ids:
-            fill_fields(f"Missing {GROUP_NAME_CAP}", missing_ids)
+            fill_fields(f"Missing {plural}", missing_ids)
         else:
-            entries.append((f"__**:tada: No missing {GROUP_NAME}! :tada:**__", "\u200b"))
+            entries.append((f"__**:tada: No missing {plural}! :tada:**__", "\u200b"))
 
         completion_percent = (
             round(len(owned_ids) / len(all_items_by_id) * 100, 1)
