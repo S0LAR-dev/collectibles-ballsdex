@@ -301,7 +301,7 @@ class CollectibleShopView(discord.ui.LayoutView):
 class Collectibles(commands.Cog):
     def __init__(self, bot: "BallsDexBot"):
         self.bot = bot
-        self.group_model: GroupName | None = None
+        self.group_model = None
         self.group = None
         self.bot.currency_cache = ("Currency", "Currencies", "")
 
@@ -327,93 +327,56 @@ class Collectibles(commands.Cog):
 
         self.bot.currency_cache = await get_currency()
 
-        self.group.add_command(self.store)
-        self.group.add_command(self.completion)
+        self.group.add_command(app_commands.Command(name="store", callback=self.store))
+        self.group.add_command(app_commands.Command(name="completion", callback=self.completion))
 
-    @app_commands.command(
-        name="store",
-        description="Browse and purchase items.",
-    )
     async def store(self, interaction: discord.Interaction):
         await interaction.response.defer()
         try:
-            player = await sync_to_async(Player.objects.get)(
-                discord_id=interaction.user.id
-            )
+            player = await sync_to_async(Player.objects.get)(discord_id=interaction.user.id)
         except ObjectDoesNotExist:
-            await interaction.followup.send(
-                "You don't have any player data yet.",
-                ephemeral=True,
-            )
+            await interaction.followup.send("You don't have any player data yet.", ephemeral=True)
             return
 
-        collectibles = await sync_to_async(list)(
-            Collectible.objects.all().order_by("id")
-        )
+        collectibles = await sync_to_async(list)(Collectible.objects.all().order_by("id"))
         if not collectibles:
-            await interaction.followup.send(
-                f"There are no {plural} available yet.",
-                ephemeral=True,
-            )
+            await interaction.followup.send(f"There are no {plural} available yet.", ephemeral=True)
             return
 
         view = CollectibleShopView(player, collectibles, self.bot)
         message = await interaction.followup.send(view=view)
         view.message = message
 
-    @app_commands.command(
-        name="completion",
-        description="Show your current completion.",
-    )
-    @app_commands.checks.cooldown(1, 20, key=lambda i: i.user.id)
-    async def completion(
-        self,
-        interaction: discord.Interaction["BallsDexBot"],
-        user: discord.User | None = None,
-    ):
+    async def completion(self, interaction: discord.Interaction, user: discord.User | None = None):
         user_obj = user or interaction.user
         await interaction.response.defer(thinking=True)
 
         try:
-            player = await sync_to_async(Player.objects.get)(
-                discord_id=user_obj.id
-            )
+            player = await sync_to_async(Player.objects.get)(discord_id=user_obj.id)
         except ObjectDoesNotExist:
-            await interaction.followup.send(
-                f"{user_obj.name} doesn't own any {plural}.",
-            )
+            await interaction.followup.send(f"{user_obj.name} doesn't own any {plural}.")
             return
 
-        interaction_player, _ = await sync_to_async(
-            Player.objects.get_or_create
-        )(discord_id=interaction.user.id)
+        interaction_player, _ = await sync_to_async(Player.objects.get_or_create)(discord_id=interaction.user.id)
 
         blocked = await player.is_blocked(interaction_player)
         if blocked and not is_staff(interaction):
-            await interaction.followup.send(
-                f"You cannot view the {plural} of a user who has blocked you.",
-                ephemeral=True,
-            )
+            await interaction.followup.send(f"You cannot view the {plural} of a user who has blocked you.", ephemeral=True)
             return
 
         if inventory_privacy(self.bot, interaction, player, user_obj) is False:
             return
 
-        all_items = await sync_to_async(list)(
-            Collectible.objects.all().order_by("id")
-        )
+        all_items = await sync_to_async(list)(Collectible.objects.all().order_by("id"))
         all_items_by_id = {c.id: c for c in all_items if c.emoji}
 
         owned_ids = set(
             await sync_to_async(list)(
-                PlayerCollectible.objects.filter(player=player).values_list(
-                    "collectible_id",
-                    flat=True,
-                )
+                PlayerCollectible.objects.filter(player=player).values_list("collectible_id", flat=True)
             )
         )
 
-        entries: list[tuple[str, str]] = []
+        entries = []
 
         def fill_fields(title: str, ids: set[int]):
             first = False
@@ -440,39 +403,25 @@ class Collectibles(commands.Cog):
         if owned_ids:
             fill_fields(f"Owned {GROUP_NAME_CAP}", owned_ids)
         else:
-            entries.append(
-                (f"__**Owned {GROUP_NAME_CAP}**__", "Nothing yet.")
-            )
+            entries.append((f"__**Owned {GROUP_NAME_CAP}**__", "Nothing yet."))
 
         missing_ids = set(all_items_by_id.keys()) - owned_ids
         if missing_ids:
             fill_fields(f"Missing {GROUP_NAME_CAP}", missing_ids)
         else:
-            entries.append(
-                (
-                    f"__**:tada: No missing {GROUP_NAME}! :tada:**__",
-                    "\u200b",
-                )
-            )
+            entries.append((f"__**:tada: No missing {GROUP_NAME}! :tada:**__", "\u200b"))
 
         completion_percent = (
             round(len(owned_ids) / len(all_items_by_id) * 100, 1)
-            if all_items_by_id
-            else 0.0
+            if all_items_by_id else 0.0
         )
 
         embed = discord.Embed(
             title=f"{user_obj.display_name}'s {GROUP_NAME_CAP} Completion",
-            description=(
-                f"Progress: **{completion_percent}% "
-                f"({len(owned_ids)}/{len(all_items_by_id)})**"
-            ),
+            description=f"Progress: **{completion_percent}% ({len(owned_ids)}/{len(all_items_by_id)})**",
             color=discord.Color.blurple(),
         )
-        embed.set_author(
-            name=user_obj.display_name,
-            icon_url=user_obj.display_avatar.url,
-        )
+        embed.set_author(name=user_obj.display_name, icon_url=user_obj.display_avatar.url)
 
         for name, value in entries:
             embed.add_field(name=name, value=value, inline=False)
