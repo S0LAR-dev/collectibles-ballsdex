@@ -343,6 +343,8 @@ class Collectibles(commands.Cog):
             )
         )
 
+        self.bot.tree.add_command(self.group)
+
     async def store(self, interaction: discord.Interaction):
         await interaction.response.defer()
         try:
