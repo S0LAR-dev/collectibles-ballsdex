@@ -168,8 +168,12 @@ class NextButton(discord.ui.Button):
 
 
 class BuyButton(discord.ui.Button):
-    def __init__(self):
-        super().__init__(style=discord.ButtonStyle.success, label=f"{settings.currency_symbol} Buy", custom_id="buy")
+    def __init__(self, currency_symbol: str):
+        super().__init__(
+            style=discord.ButtonStyle.success,
+            label=f"{currency_symbol} Buy",
+            custom_id="buy"
+        )
 
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
@@ -271,7 +275,7 @@ class CollectibleShopView(discord.ui.LayoutView):
 
         self.add_item(layout)
         self.add_item(discord.ui.ActionRow(CollectibleSelect(self.collectibles, self.bot, self.page, self.page_size)))
-        self.add_item(discord.ui.ActionRow(PrevButton(), BuyButton(), NextButton()))
+        self.add_item(discord.ui.ActionRow(PrevButton(), BuyButton(currency_symbol), NextButton()))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.player.discord_id
