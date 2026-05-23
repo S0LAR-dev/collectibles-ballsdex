@@ -327,8 +327,21 @@ class Collectibles(commands.Cog):
 
         self.bot.currency_cache = await get_currency()
 
-        self.group.add_command(app_commands.Command(name="store", callback=self.store))
-        self.group.add_command(app_commands.Command(name="completion", callback=self.completion))
+        self.group.add_command(
+            app_commands.Command(
+                name="store",
+                description=f"Browse and purchase {plural}.",
+                callback=self.store,
+            )
+        )
+
+        self.group.add_command(
+            app_commands.Command(
+                name="completion",
+                description="Show your current completion.",
+                callback=self.completion,
+            )
+        )
 
     async def store(self, interaction: discord.Interaction):
         await interaction.response.defer()
