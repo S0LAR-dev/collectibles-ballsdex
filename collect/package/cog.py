@@ -189,7 +189,7 @@ class CollectibleSelect(discord.ui.Select):
                 )
             )
         super().__init__(
-            placeholder=f"Select a {GROUP_NAME[:-1]} to view...",
+            placeholder=f"Select a {GROUP_NAME} to view...",
             min_values=1,
             max_values=1,
             options=options,
