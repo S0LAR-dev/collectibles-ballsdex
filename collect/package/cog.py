@@ -150,12 +150,9 @@ class PrevButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
         if interaction.user.id != view.player.discord_id:
-            await interaction.response.send_message(
-                f"You're not allowed to browse someone else's {GROUP_NAME}.",
-                ephemeral=True,
-            )
+            await interaction.response.send_message("You're not allowed to browse someone else's shop.", ephemeral=True)
             return
-        await view.handle_navigation(interaction, -1)
+        await view.handle_page_navigation(interaction, -1)
 
 
 class NextButton(discord.ui.Button):
@@ -165,131 +162,116 @@ class NextButton(discord.ui.Button):
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
         if interaction.user.id != view.player.discord_id:
-            await interaction.response.send_message(
-                f"You're not allowed to browse someone else's {GROUP_NAME}.",
-                ephemeral=True,
-            )
+            await interaction.response.send_message("You're not allowed to browse someone else's shop.", ephemeral=True)
             return
-        await view.handle_navigation(interaction, 1)
+        await view.handle_page_navigation(interaction, 1)
 
 
 class BuyButton(discord.ui.Button):
     def __init__(self):
-        super().__init__(
-            style=discord.ButtonStyle.success,
-            label="Buy",
-            custom_id="buy",
-            emoji="🪙",
-        )
+        super().__init__(style=discord.ButtonStyle.success, label=f"{currency_symbol} Buy", custom_id="buy")
 
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
         if interaction.user.id != view.player.discord_id:
-            await interaction.response.send_message(
-                f"You're not allowed to buy {plural} in someone else's shop.",
-                ephemeral=True,
-            )
+            await interaction.response.send_message("You're not allowed to buy items in someone else's shop.", ephemeral=True)
             return
         await view.handle_purchase(interaction)
 
 
 class CollectibleSelect(discord.ui.Select):
-    def __init__(self, collectibles: List[Collectible], bot: "BallsDexBot"):
-        options: list[discord.SelectOption] = []
-        for idx, collectible in enumerate(collectibles):
+    def __init__(self, collectibles: List[Collectible], bot: "BallsDexBot", page: int, page_size: int):
+        options = []
+        start = page * page_size
+        end = min(start + page_size, len(collectibles))
+        for idx, collectible in enumerate(collectibles[start:end], start=start):
             emoji = render_emoji(bot, collectible.emoji)
+            label = collectible.name
+            description = f"Cost: {collectible.cost}"
             options.append(
                 discord.SelectOption(
-                    label=collectible.name,
-                    description=f"Cost: {collectible.cost}"[:100],
+                    label=label,
+                    description=description[:100],
                     emoji=emoji if emoji else None,
                     value=str(idx),
                 )
             )
         super().__init__(
-            placeholder=f"Select a {GROUP_NAME[:-1]} to view...",
+            placeholder="Select an item to view...",
             min_values=1,
             max_values=1,
             options=options,
-            custom_id="collectible_select",
+            custom_id="collectible_select"
         )
 
     async def callback(self, interaction: discord.Interaction):
         view: CollectibleShopView = self.view
         if interaction.user.id != view.player.discord_id:
-            await interaction.response.send_message(
-                f"You're not allowed to browse someone else's {GROUP_NAME}.",
-                ephemeral=True,
-            )
+            await interaction.response.send_message("You're not allowed to browse someone else's shop.", ephemeral=True)
             return
         view.index = int(self.values[0])
+        view.page = view.index // view.page_size
         view.update_layout()
         await interaction.response.edit_message(view=view)
 
 
 class CollectibleShopView(discord.ui.LayoutView):
-    def __init__(
-        self,
-        player: Player,
-        collectibles: List[Collectible],
-        bot: "BallsDexBot",
-    ):
+    def __init__(self, player: Player, collectibles: List[Collectible], bot: "BallsDexBot"):
         super().__init__(timeout=None)
         self.bot = bot
         self.player = player
         self.collectibles = collectibles
         self.index = 0
+        self.page_size = 20
+        self.page = 0
         self.message: Optional[discord.Message] = None
         self.update_layout()
 
+    def total_pages(self) -> int:
+        if not self.collectibles:
+            return 1
+        return (len(self.collectibles) - 1) // self.page_size + 1
+
+    def clamp_state(self):
+        if not self.collectibles:
+            self.index = 0
+            self.page = 0
+            return
+        self.index %= len(self.collectibles)
+        self.page = max(0, min(self.page, self.total_pages() - 1))
+
     def update_layout(self):
         self.clear_items()
+        if not self.collectibles:
+            return
+        self.clamp_state()
         collectible = self.collectibles[self.index]
         emoji = render_emoji(self.bot, collectible.emoji)
         currency_name, currency_plural, currency_symbol = self.bot.currency_cache
 
-        header = (
-            f"{emoji} **{collectible.name}**"
-            if emoji
-            else f"**{collectible.name}**"
-        )
-        bio_text = (
-            f"*{collectible.bio}*"
-            if collectible.bio
-            else "*No biography available.*"
-        )
+        header = f"{emoji} **{collectible.name}**" if emoji else f"**{collectible.name}**"
+        bio_text = f"*{collectible.bio}*" if collectible.bio else "*No biography available.*"
         cost_text = f"{currency_symbol} **{collectible.cost}**"
         requirement_text = format_requirement(collectible)
 
         layout = discord.ui.Container(
-            discord.ui.TextDisplay(content=f"The {GROUP_NAME_CAP} Store!"),
+            discord.ui.TextDisplay(content=f"The {GROUP_NAME_CAP} Store! Page {self.page + 1}/{self.total_pages()}"),
             discord.ui.TextDisplay(content=header),
             discord.ui.TextDisplay(content=bio_text),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.large),
             discord.ui.TextDisplay(content=f"**__Cost__**\n{cost_text}"),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.small),
-            discord.ui.TextDisplay(
-                content=f"**__Requirement__**\n{requirement_text}"
-            ),
+            discord.ui.TextDisplay(content=f"**__Requirement__**\n{requirement_text}"),
             discord.ui.Separator(spacing=discord.SeparatorSpacing.large),
-            (
-                discord.ui.MediaGallery(
-                    discord.MediaGalleryItem(media=collectible.image_url)
-                )
-                if collectible.image_url
-                else None
-            ),
-            discord.ui.ActionRow(
-                CollectibleSelect(self.collectibles, self.bot),
-            ),
-            discord.ui.ActionRow(
-                PrevButton(),
-                BuyButton(),
-                NextButton(),
-            ),
-            accent_colour=discord.Colour.blurple(),
+            discord.ui.MediaGallery(
+                discord.MediaGalleryItem(media=collectible.image_url)
+            ) if collectible.image_url else None,
+            accent_colour=discord.Colour.blurple()
         )
+
         self.add_item(layout)
+        self.add_item(discord.ui.ActionRow(CollectibleSelect(self.collectibles, self.bot, self.page, self.page_size)))
+        self.add_item(discord.ui.ActionRow(PrevButton(), BuyButton(), NextButton()))
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         return interaction.user.id == self.player.discord_id
@@ -299,16 +281,18 @@ class CollectibleShopView(discord.ui.LayoutView):
         if self.message:
             await self.message.edit(view=self)
 
-    async def handle_navigation(
-        self,
-        interaction: discord.Interaction,
-        direction: int,
-    ):
-        self.index = (self.index + direction) % len(self.collectibles)
+    async def handle_page_navigation(self, interaction: discord.Interaction, direction: int):
+        if not self.collectibles:
+            return
+        self.page = (self.page + direction) % self.total_pages()
+        self.index = self.page * self.page_size
         self.update_layout()
         await interaction.response.edit_message(view=self)
 
     async def handle_purchase(self, interaction: discord.Interaction):
+        if not self.collectibles:
+            await interaction.response.send_message("There are no items available to purchase.", ephemeral=True)
+            return
         collectible = self.collectibles[self.index]
         result = await purchase_collectible(self.player, collectible)
         await interaction.response.send_message(result, ephemeral=True)
