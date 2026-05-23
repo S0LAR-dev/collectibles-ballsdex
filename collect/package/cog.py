@@ -303,8 +303,8 @@ class Collectibles(commands.Cog):
         self.bot = bot
         self.group_model: GroupName | None = None
         self.group = app_commands.Group(
-            name="collectibles",
-            description="Collectible commands",
+            name=f"{GROUP_NAME.lower()}",
+            description=f"{GROUP_NAME} commands",
         )
         self.bot.currency_cache = ("Currency", "Currencies", "")
 
@@ -326,9 +326,10 @@ class Collectibles(commands.Cog):
         self.group.name = plural.lower()
         self.group.description = f"{GROUP_NAME_CAP} commands"
 
-        self.bot.tree.add_command(self.group)
-
         self.bot.currency_cache = await get_currency()
+
+        self.group.add_command(self.store)
+        self.group.add_command(self.completion)
 
     @app_commands.command(
         name="store",
