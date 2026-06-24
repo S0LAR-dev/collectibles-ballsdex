@@ -16,9 +16,9 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/CrashTestAlex/collectibles-ballsdex"
-Documentation = "https://github.com/CrashTestAlex/collectibles-ballsdex#readme"
-Issues = "https://github.com/CrashTestAlex/collectibles-ballsdex/issues"
+Repository = "https://github.com/S0LAR-dev/collectibles-ballsdex"
+Documentation = "https://github.com/S0LAR-dev/collectibles-ballsdex#readme"
+Issues = "https://github.com/S0LAR-dev/collectibles-ballsdex/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
