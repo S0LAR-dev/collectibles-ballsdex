@@ -171,6 +171,7 @@ class BuyButton(discord.ui.Button):
     def __init__(self, currency_symbol: str):
         super().__init__(
             style=discord.ButtonStyle.success,
+            partial_emoji=discord.PartialEmoji(name="Rosaries", id=1513372255999098910)
             label=f"<:Rosaries:1513372255999098910> Buy",
             custom_id="buy"
         )
