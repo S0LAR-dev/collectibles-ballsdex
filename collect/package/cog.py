@@ -126,8 +126,8 @@ async def purchase_collectible(player: Player, collectible: Collectible) -> str:
     if player.money < collectible.cost:
         return (
             f"Not enough {currency_name.lower()}. "
-            f"You need "<:Rosaries:1513372255999098910>" **{collectible.cost}**, "
-            f"but you only have "<:Rosaries:1513372255999098910>" **{player.money}**."
+            f"You need <:Rosaries:1513372255999098910> **{collectible.cost}**, "
+            f"but you only have <:Rosaries:1513372255999098910> **{player.money}**."
         )
     if not await meets_requirement(player, collectible):
         return f"You don't meet the requirement for this {GROUP_NAME[:-1]}."
@@ -139,7 +139,7 @@ async def purchase_collectible(player: Player, collectible: Collectible) -> str:
     )
     return (
         f"Successfully purchased the **{collectible.name}** "
-        f"for "<:Rosaries:1513372255999098910>"{collectible.cost}!"
+        f"for <:Rosaries:1513372255999098910> {collectible.cost}!"
     )
 
 
@@ -171,7 +171,7 @@ class BuyButton(discord.ui.Button):
     def __init__(self, currency_symbol: str):
         super().__init__(
             style=discord.ButtonStyle.success,
-            label=f""<:Rosaries:1513372255999098910>" Buy",
+            label=f"<:Rosaries:1513372255999098910> Buy",
             custom_id="buy"
         )
 
