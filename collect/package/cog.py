@@ -256,7 +256,7 @@ class CollectibleShopView(discord.ui.LayoutView):
 
         header = f"{emoji} **{collectible.name}**" if emoji else f"**{collectible.name}**"
         bio_text = f"*{collectible.bio}*" if collectible.bio else "*No biography available.*"
-        cost_text = f"{currency_symbol} **{collectible.cost}**"
+        cost_text = f"<:Rosaries:1513372255999098910> **{collectible.cost}**"
         requirement_text = format_requirement(collectible)
 
         layout = discord.ui.Container(
