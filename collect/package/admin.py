@@ -68,6 +68,7 @@ class CollectAdmin(commands.Cog):
 
     @collectibles_admin.command(name="give")
     @checks.is_staff()
+    @checks.has_permissions("bd_models.add_ballinstance")
     async def collectibles_give(
         self,
         interaction: discord.Interaction,
@@ -115,6 +116,7 @@ class CollectAdmin(commands.Cog):
 
     @collectibles_admin.command(name="remove")
     @checks.is_staff()
+    @checks.has_permissions("bd_models.add_ballinstance")
     async def collectibles_remove(
         self,
         interaction: discord.Interaction,
@@ -154,6 +156,7 @@ class CollectAdmin(commands.Cog):
 
     @collectibles_admin.command(name="create")
     @checks.is_staff()
+    @checks.has_permissions("bd_models.add_ballinstance")
     async def collectibles_create(
         self,
         interaction: discord.Interaction,
