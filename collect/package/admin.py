@@ -9,7 +9,7 @@ from discord.ext import commands
 from asgiref.sync import sync_to_async
 
 from ballsdex.core.utils import checks
-from bd_models.models import Player
+from bd_models.models import BallInstance, Player
 from collect.models import Collectible, PlayerCollectible, GroupName
 
 if TYPE_CHECKING:
