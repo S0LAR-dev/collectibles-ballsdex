@@ -68,7 +68,6 @@ class CollectAdmin(commands.Cog):
 
     @collectibles_admin.command(name="give")
     @checks.app_check(checks.is_staff())
-    async def collectibles_give(...):
     async def collectibles_give(
         self,
         interaction: discord.Interaction,
