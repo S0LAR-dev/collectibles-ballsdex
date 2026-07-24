@@ -78,4 +78,4 @@ class PlayerCollectible(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.player} owns {self.collectible}"
+        return f"{self.player} owns {self.collectible}!"
